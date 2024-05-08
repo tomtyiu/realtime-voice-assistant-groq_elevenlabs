@@ -13,6 +13,8 @@ import Recording from "./recording.svg";
 import Image from "next/image";
 import axios from "axios";
 import Siriwave from 'react-siriwave';
+// index.ts
+import { ElevenLabsClient, play } from 'elevenlabs';
 
 import ChatGroq from "groq-sdk";
 
@@ -21,6 +23,7 @@ export default function Microphone() {
   const { add, remove, first, size, queue } = useQueue<any>([]);
   const [apiKey, setApiKey] = useState<CreateProjectKeyResponse | null>();
   const [neetsApiKey, setNeetsApiKey] = useState<string | null>();
+  const [ELEVENLABSAPIKEY, setELEVENLABSAPIKEY] = useState<string | null>();
   const [groqClient, setGroqClient] = useState<ChatGroq>();
   const [connection, setConnection] = useState<LiveClient | null>();
   const [isListening, setListening] = useState(false);
@@ -161,22 +164,21 @@ export default function Microphone() {
                     content: caption,
                   }
                 ],
-                model: "mixtral-8x7b-32768",
+                model: "llama3-8b-8192",
               })
               .then((chatCompletion) => {
-                if (neetsApiKey) {
+                if (setELEVENLABSAPIKEY) {
                   setCaption(chatCompletion.choices[0]?.message?.content || "");
-                  axios.post("https://api.neets.ai/v1/tts", {
+                  axios.post(" https://api.elevenlabs.io/v1/text-to-speech/{c6kFzbpMaJ8UMD5P6l72}", {
                       text: chatCompletion.choices[0]?.message?.content || "",
-                      voice_id: 'us-female-2',
-                      params: {
-                        model: 'style-diff-500'
+                      data: {
+                        model: 'eleven_turbo_v2'
                       }
                     },
                     {
                       headers: {
                         'Content-Type': 'application/json',
-                        'X-API-Key': neetsApiKey
+                        'X-API-Key': setELEVENLABSAPIKEY
                       },
                       responseType: 'arraybuffer'
                     }
