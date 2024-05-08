@@ -4,10 +4,10 @@ import { NextResponse } from "next/server";
 export async function GET(request: Request) {
   // gotta use the request object to invalidate the cache every request :vomit:
   const url = request.url;
-  const deepgram = createClient(process.env.DEEPGRAM_API_KEY ?? "");
+  const client = new ElevenLabsClient({apiKey: ELEVENLABS_API_KEY,});
 
   let { result: projectsResult, error: projectsError } =
-    await deepgram.manage.getProjects();
+    await client.manage.getProjects();
 
   if (projectsError) {
     return NextResponse.json(projectsError);
@@ -17,14 +17,14 @@ export async function GET(request: Request) {
 
   if (!project) {
     return NextResponse.json(
-      new DeepgramError(
-        "Cannot find a Deepgram project. Please create a project first."
+      new clientError(
+        "Cannot find a Elevenlabs project. Please create a project first."
       )
     );
   }
 
   let { result: newKeyResult, error: newKeyError } =
-    await deepgram.manage.createProjectKey(project.project_id, {
+    await client.manage.createProjectKey(project.project_id, {
       comment: "Temporary API key",
       scopes: ["usage:write"],
       tags: ["next.js"],
